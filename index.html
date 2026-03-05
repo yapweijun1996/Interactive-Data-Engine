@@ -819,45 +819,216 @@
         /* Tabulator Custom Styling to Match Theme */
         .tabulator {
             border: 1px solid var(--border-light);
-            border-radius: 6px;
+            border-radius: 8px;
             background-color: var(--bg-card);
-            font-family: inherit;
+            font-family: 'Inter', -apple-system, sans-serif;
             font-size: 0.8125rem;
             color: var(--text-main);
+            overflow: hidden;
         }
-        .tabulator-header {
+
+        /* Header */
+        .tabulator .tabulator-header {
             background-color: var(--table-header) !important;
+            border-bottom: 2px solid var(--border-light) !important;
+        }
+        .tabulator .tabulator-header .tabulator-col {
+            background-color: var(--table-header) !important;
+            border-right: 1px solid var(--border-light) !important;
+        }
+        .tabulator .tabulator-header .tabulator-col .tabulator-col-content {
+            padding: 0.7rem 0.8rem !important;
+        }
+        .tabulator .tabulator-header .tabulator-col .tabulator-col-title {
             color: var(--text-muted) !important;
-            border-bottom: 1px solid var(--border-light) !important;
-            text-transform: uppercase;
-            letter-spacing: 0.025em;
             font-weight: 600 !important;
-            font-size: 0.7rem;
+            font-size: 0.7rem !important;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
         }
-        .tabulator-row {
+        .tabulator .tabulator-header .tabulator-col.tabulator-sortable .tabulator-col-title {
+            padding-right: 20px !important;
+        }
+        .tabulator .tabulator-header .tabulator-col .tabulator-arrow {
+            border-bottom-color: var(--text-muted) !important;
+            border-top-color: var(--text-muted) !important;
+        }
+
+        /* Rows & Cells */
+        .tabulator .tabulator-tableholder .tabulator-table .tabulator-row {
+            border-bottom: 1px solid var(--border-light) !important;
             background-color: var(--bg-card) !important;
-            border-bottom: 1px solid var(--border-light);
+            min-height: 38px;
         }
-        .tabulator-row:nth-child(even) {
+        .tabulator .tabulator-tableholder .tabulator-table .tabulator-row:nth-child(even) {
             background-color: #fafbfc !important;
         }
-        .tabulator-row:hover {
-            background-color: var(--pvt-dropzone-bg) !important;
+        .tabulator .tabulator-tableholder .tabulator-table .tabulator-row:hover {
+            background-color: var(--pvt-pill-active-bg) !important;
         }
-        .tabulator-footer {
+        .tabulator .tabulator-tableholder .tabulator-table .tabulator-row .tabulator-cell {
+            border-right: 1px solid var(--border-light) !important;
+            padding: 0.55rem 0.8rem !important;
+            color: var(--text-main);
+        }
+
+        /* Footer & Pagination */
+        .tabulator .tabulator-footer {
             background-color: var(--table-header) !important;
-            border-top: 1px solid var(--border-light) !important;
+            border-top: 2px solid var(--border-light) !important;
+            padding: 0.5rem 0.75rem !important;
         }
-        .tabulator-page {
+        .tabulator .tabulator-footer .tabulator-paginator {
+            color: var(--text-muted) !important;
+            font-size: 0.8125rem;
+            font-family: inherit;
+        }
+        .tabulator .tabulator-footer .tabulator-paginator label {
+            color: var(--text-muted) !important;
+            font-weight: 500;
+        }
+        .tabulator .tabulator-footer .tabulator-page-size {
+            font-family: inherit !important;
+            font-size: 0.8125rem !important;
+            border: 1px solid var(--border-light) !important;
+            border-radius: 6px !important;
+            padding: 0.3rem 0.5rem !important;
+            color: var(--text-main) !important;
+            background: var(--bg-card) !important;
+            outline: none;
+        }
+        .tabulator .tabulator-footer .tabulator-page {
+            font-family: inherit !important;
+            font-size: 0.8125rem !important;
             color: var(--text-main) !important;
             border: 1px solid var(--border-light) !important;
-            border-radius: 4px;
-            margin: 0 2px;
+            border-radius: 6px !important;
+            padding: 0.3rem 0.6rem !important;
+            margin: 0 2px !important;
+            background: var(--bg-card) !important;
+            transition: all 0.15s;
         }
-        .tabulator-page.active {
+        .tabulator .tabulator-footer .tabulator-page:hover {
+            background-color: var(--bg-body) !important;
+            border-color: var(--pvt-dropzone-border) !important;
+        }
+        .tabulator .tabulator-footer .tabulator-page.active {
             background-color: var(--primary) !important;
             color: white !important;
             border-color: var(--primary) !important;
+            font-weight: 600;
+        }
+        .tabulator .tabulator-footer .tabulator-page[disabled] {
+            opacity: 0.4;
+        }
+
+        /* Raw Data Controls (search + columns) */
+        .raw-data-controls {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .raw-search-input {
+            font-family: 'Inter', -apple-system, sans-serif;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 0.55rem 0.75rem 0.55rem 2rem;
+            background-color: var(--bg-card);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: 0.6rem center;
+            background-size: 1rem;
+            color: var(--text-main);
+            outline: none;
+            width: 200px;
+            transition: all 0.2s;
+        }
+        .raw-search-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            width: 260px;
+        }
+        .raw-search-input::placeholder {
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        /* Column Visibility Dropdown */
+        .col-toggle-wrapper {
+            position: relative;
+        }
+        .col-toggle-dropdown {
+            position: absolute;
+            top: calc(100% + 6px);
+            right: 0;
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 10px;
+            box-shadow: 0 12px 24px -4px rgba(0,0,0,0.12), 0 4px 8px -2px rgba(0,0,0,0.06);
+            padding: 0.5rem;
+            z-index: 100;
+            min-width: 220px;
+            max-height: 320px;
+            overflow-y: auto;
+        }
+        .col-dropdown-header {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-muted);
+            padding: 0.35rem 0.5rem 0.5rem;
+        }
+        .col-toggle-dropdown label {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.4rem 0.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8125rem;
+            color: var(--text-main);
+            transition: background-color 0.1s;
+        }
+        .col-toggle-dropdown label:hover {
+            background: var(--bg-body);
+        }
+        .col-toggle-dropdown label span {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .col-toggle-dropdown input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border: 1px solid var(--text-muted);
+            border-radius: 4px;
+            display: grid;
+            place-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.15s;
+            background: var(--bg-card);
+        }
+        .col-toggle-dropdown input[type="checkbox"]::before {
+            content: "";
+            width: 10px;
+            height: 10px;
+            clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+            transform: scale(0);
+            transition: 120ms transform ease-in-out;
+            background-color: white;
+        }
+        .col-toggle-dropdown input[type="checkbox"]:checked {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+        .col-toggle-dropdown input[type="checkbox"]:checked::before {
+            transform: scale(1);
         }
     </style>
 </head>
@@ -905,6 +1076,17 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                     Export to CSV
                 </button>
+                <div class="raw-data-controls" style="display: none;">
+                    <div style="width: 1px; height: 24px; background: var(--border-light);"></div>
+                    <div class="col-toggle-wrapper">
+                        <button class="btn-upload btn-secondary" id="btn-columns">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7m0-18H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7m0-18v18"></path></svg>
+                            Columns
+                        </button>
+                        <div class="col-toggle-dropdown" id="col-dropdown" style="display: none;"></div>
+                    </div>
+                    <input type="text" id="raw-search" class="raw-search-input" placeholder="Search all columns...">
+                </div>
             </div>
         </div>
 
@@ -1354,34 +1536,104 @@
                 
                 isPivotView = !isPivotView;
                 
+                // Pivot-only toolbar controls
+                const $pivotOnly = $('#btn-toggle-ui, #btn-export-png, #renderer-host').add($('#renderer-host').prev('div'));
+
                 if (isPivotView) {
                     // Switch to Pivot Table View
                     $('#long-table-output').hide();
                     $('#pivot-table-output').fadeIn(200);
                     $btnText.text('View Raw Data');
-                    $btnIcon.html('<rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line>'); // Table icon
+                    $btnIcon.html('<rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line>');
+                    $pivotOnly.show();
+                    $('.raw-data-controls').hide();
                 } else {
                     // Switch to Long Table (Raw Data) View
                     $('#pivot-table-output').hide();
                     $('#long-table-output').fadeIn(200);
                     $btnText.text('View Pivot Table');
-                    $btnIcon.html('<rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line><line x1="15" y1="3" x2="15" y2="9"></line>'); // Pivot icon (modified table)
+                    $btnIcon.html('<rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line><line x1="15" y1="3" x2="15" y2="9"></line>');
+                    $pivotOnly.hide();
+                    $('.raw-data-controls').css('display', 'flex');
                     
                     // Initialize or update Tabulator
                     if (!window.tabulatorTable) {
                         window.tabulatorTable = new Tabulator("#long-table-output", {
                             data: window.appData,
-                            autoColumns: true, // Automatically generate columns from the data keys
-                            layout: "fitDataFill", // Fit columns to data width
-                            pagination: "local", // Enable local pagination
-                            paginationSize: 50, // 50 rows per page
-                            paginationSizeSelector: [25, 50, 100, true], // Allow user to change page size
-                            movableColumns: true, // Allow user to drag and drop columns
+                            autoColumns: true,
+                            layout: "fitDataFill",
+                            height: "calc(100vh - 220px)",
+                            pagination: "local",
+                            paginationSize: 50,
+                            paginationSizeSelector: [25, 50, 100, true],
+                            movableColumns: true,
                             resizableColumnFit: true,
+                            columnDefaults: {
+                                headerSort: true,
+                            },
                         });
                     } else {
                         window.tabulatorTable.setData(window.appData);
                     }
+                }
+            });
+
+            // Global search for Raw Data view
+            let searchTimeout;
+            $('#raw-search').on('keyup', function() {
+                clearTimeout(searchTimeout);
+                const val = $(this).val().toLowerCase();
+                searchTimeout = setTimeout(function() {
+                    if (!window.tabulatorTable) return;
+                    if (val === '') {
+                        window.tabulatorTable.clearFilter();
+                    } else {
+                        window.tabulatorTable.setFilter(function(data) {
+                            return Object.values(data).some(v =>
+                                String(v).toLowerCase().includes(val)
+                            );
+                        });
+                    }
+                }, 200);
+            });
+
+            // Column visibility toggle
+            $('#btn-columns').click(function(e) {
+                e.stopPropagation();
+                const $dropdown = $('#col-dropdown');
+                if ($dropdown.is(':visible')) {
+                    $dropdown.hide();
+                    return;
+                }
+                if (!window.tabulatorTable) return;
+
+                // Build checkbox list
+                const cols = window.tabulatorTable.getColumns();
+                let html = '<div class="col-dropdown-header">Toggle Columns</div>';
+                cols.forEach(col => {
+                    const field = col.getField();
+                    const title = col.getDefinition().title || field;
+                    const checked = col.isVisible() ? 'checked' : '';
+                    html += '<label><input type="checkbox" data-field="' + field + '" ' + checked + '><span>' + title + '</span></label>';
+                });
+                $dropdown.html(html).show();
+            });
+
+            // Handle column checkbox change
+            $(document).on('change', '#col-dropdown input[type="checkbox"]', function() {
+                const field = $(this).data('field');
+                if (!window.tabulatorTable) return;
+                if ($(this).is(':checked')) {
+                    window.tabulatorTable.showColumn(field);
+                } else {
+                    window.tabulatorTable.hideColumn(field);
+                }
+            });
+
+            // Close column dropdown when clicking outside
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('.col-toggle-wrapper').length) {
+                    $('#col-dropdown').hide();
                 }
             });
         });
