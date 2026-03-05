@@ -5,13 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Advanced Sales Analytics Pivot</title>
     
-    <!-- External CSS for PivotTable.js -->
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/pivottable/2.23.0/pivot.min.css">
-    
-    <!-- Google Fonts: Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Local CSS -->
+    <link rel="stylesheet" type="text/css" href="libs/css/pivot.min.css">
+    <link rel="stylesheet" href="libs/css/inter.css">
     
     <style>
         :root {
@@ -817,7 +813,7 @@
         }
     </style>
     <!-- Tabulator CSS -->
-    <link href="https://unpkg.com/tabulator-tables@6.2.1/dist/css/tabulator.min.css" rel="stylesheet">
+    <link href="libs/css/tabulator.min.css" rel="stylesheet">
 
     <style>
         /* Tabulator Custom Styling to Match Theme */
@@ -918,21 +914,14 @@
         <div id="long-table-output" style="display: none; margin-top: 1rem;"></div>
     </div>
 
-    <!-- Required JavaScript Libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-    
-    <!-- Plotly.js for Advanced Charting -->
-    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
-    
-    <!-- PapaParse for CSV parsing -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-
-    <!-- PivotTable.js Core + Plotly Renderers -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pivottable/2.23.0/pivot.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pivottable/2.23.0/plotly_renderers.min.js"></script>
-    <!-- Tabulator JS -->
-    <script type="text/javascript" src="https://unpkg.com/tabulator-tables@6.2.1/dist/js/tabulator.min.js"></script>
+    <!-- Local JavaScript Libraries -->
+    <script src="libs/js/jquery.min.js"></script>
+    <script src="libs/js/jquery-ui.min.js"></script>
+    <script src="libs/js/plotly.min.js"></script>
+    <script src="libs/js/papaparse.min.js"></script>
+    <script src="libs/js/pivot.min.js"></script>
+    <script src="libs/js/plotly_renderers.min.js"></script>
+    <script src="libs/js/tabulator.min.js"></script>
 
 
     <script>

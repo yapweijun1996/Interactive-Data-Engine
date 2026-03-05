@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl:*)",
+      "Bash(ls -la \"c:\\\\Users\\\\tno\\\\Documents\\\\GitHub\\\\Interactive-Data-Engine\\\\libs\\\\js\"\" && ls -la \"c:UserstnoDocumentsGitHubInteractive-Data-Enginelibscss\"\")"
+    ]
+  }
+}
