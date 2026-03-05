@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Sales Analytics Pivot</title>
+    
+    <!-- External CSS for PivotTable.js -->
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/pivottable/2.23.0/pivot.min.css">
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Light Theme Variables */
+            --bg-body: #f1f5f9;
+            --bg-card: #ffffff;
+            --primary: #2563eb;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-light: #e2e8f0;
+            --table-header: #f8fafc;
+            --primary-hover: #1d4ed8;
+            --success: #10b981;
+            
+            /* Pivot Table Specific Variables */
+            --pvt-dropzone-bg: #f8fafc;
+            --pvt-dropzone-border: #cbd5e1;
+            --pvt-pill-bg: #ffffff;
+            --pvt-pill-text: #1e293b;
+            --pvt-pill-border: #e2e8f0;
+            --pvt-pill-active-bg: #eff6ff;
+            --pvt-pill-active-border: #bfdbfe;
+            --pvt-pill-active-text: #1e40af;
+            --pvt-pill-filtered-bg: #fffbeb;
+            --pvt-pill-filtered-border: #fcd34d;
+            --pvt-pill-filtered-text: #b45309;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Custom Webkit Scrollbars for an Advanced Feel */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-body); 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--text-muted); 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary); 
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-size: 14px;
+            padding: 2rem;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+        }
+
+        .content-area {
+            width: 100%;
+            max-width: 100%;
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-light);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.025);
+            padding: 1.5rem;
+            overflow-x: auto;
+        }
+
+        /* ==========================================================================
+           ADVANCED UI LOGIC FOR PIVOTTABLE.JS
+           ========================================================================== */
+        
+        .pvtUi {
+            font-family: 'Inter', sans-serif;
+            width: 100%;
+            border-spacing: 0.5rem;
+        }
+
+        /* Drop Zone Section Labels */
+        td.pvtAxisContainer::before,
+        td.pvtVals::before {
+            display: block;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            opacity: 0.7;
+        }
+        td.pvtAxisContainer.pvtUnused::before { content: "Available Fields"; }
+        td.pvtAxisContainer.pvtRows::before { content: "Row Fields"; }
+        td.pvtAxisContainer.pvtCols::before { content: "Column Fields"; }
+        td.pvtVals::before { content: "Values"; flex: 0 0 100%; }
+
+        /* Drop Zones */
+        td.pvtVals {
+            background: var(--pvt-dropzone-bg);
+            border: 1px dashed var(--pvt-dropzone-border);
+            border-radius: 8px;
+            padding: 0.75rem;
+            transition: background-color 0.2s;
+            width: 1%;
+            min-width: 180px;
+            vertical-align: top;
+        }
+
+        td.pvtAxisContainer {
+            background: var(--pvt-dropzone-bg);
+            border: 1px dashed var(--pvt-dropzone-border);
+            border-radius: 8px;
+            padding: 0.75rem;
+            transition: background-color 0.2s;
+            vertical-align: top;
+        }
+
+        /* Constrain the unused fields panel */
+        td.pvtAxisContainer.pvtUnused {
+            max-width: 240px;
+            max-height: 420px;
+            overflow-y: auto;
+        }
+
+        td.pvtAxisContainer:hover {
+            background: var(--bg-body);
+        }
+
+        /* Draggable Pills */
+        .pvtAttr {
+            background: var(--pvt-pill-bg);
+            border: 1px solid var(--pvt-pill-border);
+            color: var(--pvt-pill-text);
+            font-weight: 500;
+            font-size: 0.8125rem;
+            padding: 0.35rem 0.5rem 0.35rem 0.35rem; 
+            border-radius: 6px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+            margin: 0.25rem;
+            cursor: grab;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            user-select: none;
+        }
+
+        .pvtAttr::before {
+            content: "";
+            display: inline-block;
+            width: 10px;
+            height: 14px;
+            margin-right: 6px;
+            background-image: radial-gradient(var(--text-muted) 1px, transparent 0);
+            background-size: 4px 4px;
+            background-position: left center;
+            background-repeat: repeat;
+            opacity: 0.4;
+            transition: opacity 0.2s;
+        }
+
+        .pvtAttr:hover {
+            border-color: var(--primary);
+            box-shadow: 0 2px 4px rgba(37, 99, 235, 0.05);
+            transform: translateY(-1px);
+        }
+        
+        .pvtAttr:hover::before {
+            opacity: 0.8;
+            background-image: radial-gradient(var(--primary) 1px, transparent 0);
+        }
+
+        .pvtAttr:active {
+            cursor: grabbing;
+            transform: translateY(0);
+        }
+
+        /* State-Based Styling Logic */
+        .pvtUnused .pvtAttr { /* Inherits from root variables */ }
+
+        .pvtRows .pvtAttr, .pvtCols .pvtAttr {
+            background: var(--pvt-pill-active-bg);
+            border-color: var(--pvt-pill-active-border);
+            color: var(--pvt-pill-active-text);
+        }
+        .pvtRows .pvtAttr::before, .pvtCols .pvtAttr::before {
+            background-image: radial-gradient(var(--primary) 1px, transparent 0);
+            opacity: 0.6;
+        }
+
+        .pvtAttr.pvtFilteredAttribute {
+            background: var(--pvt-pill-filtered-bg);
+            border-color: var(--pvt-pill-filtered-border);
+            color: var(--pvt-pill-filtered-text);
+        }
+        .pvtAttr.pvtFilteredAttribute::before {
+             background-image: radial-gradient(#fbbf24 1px, transparent 0);
+        }
+
+        .pvtTriangle {
+            margin-left: 6px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .pvtRows .pvtAttr .pvtTriangle, .pvtCols .pvtAttr .pvtTriangle {
+            color: var(--primary);
+        }
+        
+        .pvtAttr.pvtFilteredAttribute .pvtTriangle {
+            color: #d97706; 
+        }
+
+        .pvtTriangle:hover {
+            background-color: rgba(150,150,150,0.15);
+            color: var(--text-main) !important;
+        }
+
+        /* Drag and Drop Visual Helpers */
+        .ui-sortable-helper {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+            transform: rotate(3deg) scale(1.05) !important;
+            cursor: grabbing !important;
+            z-index: 1000 !important;
+            opacity: 0.95;
+            background: var(--bg-card) !important;
+        }
+
+        .ui-sortable-placeholder {
+            background: rgba(37, 99, 235, 0.05) !important;
+            border: 2px dashed var(--primary) !important;
+            border-radius: 6px !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            margin: 0.25rem !important;
+            height: 32px !important;
+            width: 80px !important;
+        }
+
+        /* Renderer Cell (top-left of pivot UI table) */
+        td.pvtUiCell:first-child {
+            vertical-align: top;
+            padding: 0.5rem;
+        }
+
+        /* Renderer Area - the td containing the renderer dropdown */
+        .pvtRenderer {
+            margin-bottom: 0.75rem;
+        }
+
+        /* Dropdowns */
+        .pvtAggregator, .pvtRenderer, .pvtAttrDropdown {
+            font-family: inherit;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            padding: 0.5rem 2rem 0.5rem 0.75rem; 
+            margin-bottom: 0.5rem;
+            background-color: var(--bg-card);
+            color: var(--text-main);
+            outline: none;
+            transition: all 0.2s;
+            cursor: pointer;
+            appearance: none; 
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.6rem center;
+            background-size: 1em;
+            width: 100%; 
+            max-width: 100%; /* Override to allow full flex stretching */
+        }
+
+        .pvtAggregator:focus, .pvtRenderer:focus, .pvtAttrDropdown:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%232563eb'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+        }
+
+        /* Specific container fixes for the dropdowns */
+        .pvtVals {
+            /* Removing previous flex-direction to avoid conflicts with new grid layout */
+        }
+
+        /* The row that contains the Aggregator type (Sum) and the Attribute (Sales) */
+        .pvtAggregatorRow {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Data Table (With Sticky Headers) */
+        .pvtTableWrapper {
+            max-height: calc(100vh - 300px);
+            min-height: 200px;
+            overflow: auto;
+            border-radius: 6px;
+            border: 1px solid var(--border-light);
+        }
+
+        table.pvtTable {
+            font-family: inherit;
+            font-size: 0.8125rem;
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+            margin-top: 0;
+            table-layout: auto; /* Allow table to define its own layout rather than forcing 100% width on small content */
+        }
+        
+        /* Stop the renderer area from expanding to infinity */
+        .pvtRendererArea {
+            padding: 0.5rem 0 0 0;
+            margin: 0;
+            width: 100%;
+            max-width: 100%;
+            border-top: 1px solid var(--border-light);
+        }
+
+        /* Fix the layout for the top area where the aggregator and cols are */
+        td.pvtVals {
+            width: 1%; /* Force to smallest possible width */
+            min-width: 250px; 
+            white-space: nowrap; 
+            display: flex; 
+            flex-wrap: wrap; /* Allow elements to wrap to next line naturally */
+            gap: 0.35rem; /* Tight, consistent spacing between all elements */
+            padding: 0.5rem; /* Reduced padding from 0.75rem to save vertical height */
+            align-content: flex-start; /* Ensure everything packs tightly to the top */
+        }
+        
+        td.pvtVals > br {
+            display: none; /* Hide the ugly hardcoded <br> tags */
+        }
+        
+        .pvtVals select {
+            margin-bottom: 0; 
+        }
+
+        /* 
+           Row 1: The Primary Aggregator Dropdown 
+           Force it to take 100% of the container width 
+        */
+        .pvtAggregator { 
+            width: 100%;
+            max-width: 100%;
+            flex: 0 0 100%; /* Flex-basis 100% forces it onto its own line */
+        }
+        
+        /* 
+           Row 2: The Secondary Attribute Dropdown + The Two Arrows
+           We calculate the exact width needed to fit the two 32px arrows plus the 0.35rem gap
+        */
+        .pvtAttrDropdown { 
+            width: calc(100% - 70px - 0.7rem); /* 100% minus (32px + 32px + 2 gaps) */
+            max-width: none;
+            flex-grow: 1; /* Allow it to take up any remaining slack space */
+        }
+
+        /* Sorting Arrows (RowOrder and ColOrder) */
+        .pvtRowOrder, .pvtColOrder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 32px;
+            width: 32px;
+            border-radius: 6px;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-light);
+            color: var(--text-muted);
+            font-size: 1.125rem;
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            margin: 0; 
+            flex-shrink: 0; /* Never allow the arrows to shrink below 32px */
+        }
+
+        .pvtRowOrder:hover, .pvtColOrder:hover {
+            background-color: var(--bg-body);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Sticky Headers Implementation */
+        table.pvtTable thead tr th, table.pvtTable tbody tr th {
+            background-color: var(--table-header);
+            border-bottom: 1px solid var(--border-light);
+            border-right: 1px solid var(--border-light);
+            color: var(--text-muted);
+            font-weight: 600;
+            padding: 0.6rem 0.8rem;
+            text-align: left;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+            font-size: 0.7rem;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        table.pvtTable tbody tr th { /* Row Labels Sticky Left */
+            left: 0;
+            z-index: 20;
+        }
+
+        /* The top-left corner needs to be highest z-index */
+        table.pvtTable thead tr th.pvtAxisLabel {
+            z-index: 30;
+            left: 0;
+        }
+
+        table.pvtTable tbody tr td {
+            border-bottom: 1px solid var(--border-light);
+            border-right: 1px solid var(--border-light);
+            padding: 0.6rem 0.8rem;
+            color: var(--text-main);
+            text-align: right;
+            transition: background-color 0.15s;
+            background-color: var(--bg-card);
+        }
+
+        table.pvtTable tbody tr:nth-child(even) td {
+            background-color: #fafbfc;
+        }
+
+        table.pvtTable tbody tr:hover td {
+            background-color: var(--pvt-dropzone-bg);
+        }
+
+        .pvtTotal, .pvtTotalLabel, .pvtGrandTotal {
+            font-weight: 700 !important;
+            background-color: var(--pvt-dropzone-bg) !important;
+            color: var(--text-main) !important;
+        }
+
+        /* Filter Box / Modal Customizations */
+        .pvtFilterBox {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.05);
+            padding: 1.25rem;
+            z-index: 1000 !important; /* Ensure it floats above sticky headers */
+            color: var(--text-main);
+            min-width: 280px;
+            max-width: 320px;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* Modal Header (Title & Count) */
+        .pvtFilterBox h4 { 
+            margin-top: 0; 
+            margin-bottom: 1rem; 
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .pvtFilterBox h4 span.count {
+            background: var(--bg-body);
+            color: var(--text-muted);
+            padding: 0.125rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        /* Search Input */
+        .pvtFilterBox p:first-of-type {
+            margin: 0 0 0.75rem 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .pvtFilterBox input.pvtSearch {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            background: var(--bg-body);
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 0.8125rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+        
+        .pvtFilterBox input.pvtSearch:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+            background: var(--bg-card);
+        }
+
+        /* Select All / Select None Buttons (Text Links) */
+        .pvtFilterBox p:first-of-type button {
+            background: transparent;
+            border: none;
+            color: var(--primary);
+            font-weight: 500;
+            font-size: 0.75rem;
+            padding: 0;
+            margin-right: 1rem;
+            cursor: pointer;
+            box-shadow: none;
+        }
+        .pvtFilterBox p:first-of-type button:hover {
+            color: var(--primary-hover);
+            text-decoration: underline;
+        }
+        .pvtFilterBox p:first-of-type br { display: none; } /* Hide the ugly <br> PivotTable injects */
+
+        /* The Checkbox List Container */
+        .pvtCheckContainer {
+            max-height: 240px;
+            overflow-y: auto;
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            padding: 0.25rem;
+            margin-bottom: 1rem;
+            background: var(--bg-card);
+        }
+
+        /* Checkbox Rows */
+        .pvtCheckContainer p {
+            margin: 0;
+        }
+
+        .pvtCheckContainer label {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.15s;
+            font-size: 0.8125rem;
+            color: var(--text-main);
+        }
+
+        .pvtCheckContainer label:hover {
+            background-color: var(--bg-body);
+        }
+
+        /* Customizing the actual Checkboxes */
+        .pvtCheckContainer input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border: 1px solid var(--text-muted);
+            border-radius: 4px;
+            margin-right: 0.75rem;
+            display: grid;
+            place-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background-color: var(--bg-card);
+        }
+
+        .pvtCheckContainer input[type="checkbox"]::before {
+            content: "";
+            width: 10px;
+            height: 10px;
+            clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+            transform: scale(0);
+            transform-origin: bottom left;
+            transition: 120ms transform ease-in-out;
+            box-shadow: inset 1em 1em white;
+            background-color: white;
+        }
+
+        .pvtCheckContainer input[type="checkbox"]:checked {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .pvtCheckContainer input[type="checkbox"]:checked::before {
+            transform: scale(1);
+        }
+
+        /* Checkbox Row Value & Count */
+        .pvtCheckContainer label span.value {
+            flex-grow: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .pvtCheckContainer label span.count {
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            background: var(--bg-body);
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+            margin-left: 0.5rem;
+        }
+
+        /* Action Buttons (Apply / Cancel) */
+        .pvtFilterBox p:last-of-type {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            margin: 0;
+        }
+
+        .pvtFilterBox p:last-of-type button {
+            padding: 0.4rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 500;
+            font-size: 0.8125rem;
+            transition: all 0.2s;
+            border: 1px solid var(--border-light);
+        }
+
+        /* Cancel Button */
+        .pvtFilterBox p:last-of-type button:last-child {
+            background: var(--bg-card);
+            color: var(--text-main);
+        }
+        .pvtFilterBox p:last-of-type button:last-child:hover {
+            background: var(--bg-body);
+        }
+
+        /* Apply Button (We have to target by text or order because PivotTable doesn't give them classes) */
+        .pvtFilterBox p:last-of-type button:first-child {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .pvtFilterBox p:last-of-type button:first-child:hover {
+            background: var(--primary-hover);
+        }
+
+        /* Plotly Chart Overrides */
+        .js-plotly-plot .plotly .main-svg {
+            border-radius: 6px;
+        }
+    </style>
+    <style>
+        /* (Added custom styles for upload button) */
+        .upload-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end; /* Align bottom to keep title and button nicely leveled */
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        .upload-header-text {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .upload-header h2 {
+            margin: 0;
+            font-size: 1.5rem; /* Larger, more prominent title */
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            letter-spacing: -0.025em; /* Modern tight kerning */
+        }
+        
+        .upload-header h2 svg {
+            color: var(--primary); /* Brand accent icon */
+        }
+
+        .upload-header .status {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        
+        /* Pulse dot for live data indication */
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: var(--text-muted);
+            border-radius: 50%;
+        }
+        .status-dot.active {
+            background-color: var(--success);
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+        }
+        .status-dot.error {
+            background-color: #ef4444;
+            box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+        }
+        .status-dot.loading {
+            background-color: var(--primary);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); opacity: 0.5; }
+            50% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(0.95); opacity: 0.5; }
+        }
+
+        .btn-upload {
+            background-color: var(--primary);
+            color: white;
+            border: 1px solid transparent;
+            padding: 0.6rem 1.25rem;
+            border-radius: 8px; /* Slightly softer corners for modern feel */
+            font-family: inherit;
+            font-size: 0.875rem;
+            font-weight: 600; /* Bolder text for primary CTA */
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2), 0 2px 4px -1px rgba(37, 99, 235, 0.1); /* Primary brand shadow */
+        }
+        
+        .btn-upload:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 8px -1px rgba(37, 99, 235, 0.25), 0 4px 6px -1px rgba(37, 99, 235, 0.15);
+        }
+        
+        .btn-upload:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 2px rgba(37, 99, 235, 0.2);
+        }
+        
+        .btn-secondary {
+            background-color: var(--bg-card);
+            color: var(--text-main);
+            border: 1px solid var(--border-light);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .btn-secondary:hover {
+            background-color: var(--bg-body);
+            border-color: var(--pvt-dropzone-border);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+
+        .btn-upload svg {
+            width: 18px; /* Slightly larger icon */
+            height: 18px;
+            stroke-width: 2.5px; /* Thicker, bolder stroke for icons inside solid buttons */
+        }
+    </style>
+    <!-- Tabulator CSS -->
+    <link href="https://unpkg.com/tabulator-tables@6.2.1/dist/css/tabulator.min.css" rel="stylesheet">
+
+    <style>
+        /* Tabulator Custom Styling to Match Theme */
+        .tabulator {
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            background-color: var(--bg-card);
+            font-family: inherit;
+            font-size: 0.8125rem;
+            color: var(--text-main);
+        }
+        .tabulator-header {
+            background-color: var(--table-header) !important;
+            color: var(--text-muted) !important;
+            border-bottom: 1px solid var(--border-light) !important;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+            font-weight: 600 !important;
+            font-size: 0.7rem;
+        }
+        .tabulator-row {
+            background-color: var(--bg-card) !important;
+            border-bottom: 1px solid var(--border-light);
+        }
+        .tabulator-row:nth-child(even) {
+            background-color: #fafbfc !important;
+        }
+        .tabulator-row:hover {
+            background-color: var(--pvt-dropzone-bg) !important;
+        }
+        .tabulator-footer {
+            background-color: var(--table-header) !important;
+            border-top: 1px solid var(--border-light) !important;
+        }
+        .tabulator-page {
+            color: var(--text-main) !important;
+            border: 1px solid var(--border-light) !important;
+            border-radius: 4px;
+            margin: 0 2px;
+        }
+        .tabulator-page.active {
+            background-color: var(--primary) !important;
+            color: white !important;
+            border-color: var(--primary) !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="content-area">
+        
+        <div class="upload-header">
+            <div class="upload-header-text">
+                <h2>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="22" height="22"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+                    Interactive Data Engine
+                </h2>
+                <div class="status" id="data-status">
+                    <span class="status-dot"></span>
+                    <span>Please upload a CSV file to begin</span>
+                </div>
+            </div>
+            <div>
+                <input type="file" id="csv-file-input" accept=".csv" style="display: none;">
+                <button class="btn-upload btn-secondary" id="btn-toggle-view" style="margin-right: 0.5rem; display: none;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                    <span>View Raw Data</span>
+                </button>
+
+                <button class="btn-upload btn-secondary" id="btn-export-png" style="margin-right: 0.5rem;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                    Export Chart
+                </button>
+                <button class="btn-upload btn-secondary" id="btn-export-csv" style="margin-right: 0.5rem;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    Export to CSV
+                </button>
+                <button class="btn-upload" id="btn-import-csv">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                    Upload CSV File
+                </button>
+            </div>
+        </div>
+
+        <!-- PivotTable.js Output -->
+        <div id="pivot-table-output"></div>
+        <!-- Tabulator Long Table Output -->
+        <div id="long-table-output" style="display: none; margin-top: 1rem;"></div>
+    </div>
+
+    <!-- Required JavaScript Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    
+    <!-- Plotly.js for Advanced Charting -->
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    
+    <!-- PapaParse for CSV parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+    <!-- PivotTable.js Core + Plotly Renderers -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pivottable/2.23.0/pivot.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pivottable/2.23.0/plotly_renderers.min.js"></script>
+    <!-- Tabulator JS -->
+    <script type="text/javascript" src="https://unpkg.com/tabulator-tables@6.2.1/dist/js/tabulator.min.js"></script>
+
+
+    <script>
+        $(document).ready(function() {
+            // Global state to hold the cleaned CSV data for Tabulator
+            window.appData = [];
+            window.tabulatorTable = null;
+            let isPivotView = true;
+
+            // Setup Renderers (Combine standard tables with advanced Plotly charts)
+            const renderers = $.extend(
+                {},
+                $.pivotUtilities.renderers, 
+                $.pivotUtilities.plotly_renderers
+            );
+
+            const configStorageKey = 'pivotAdvancedConfig_v2'; 
+            
+            // Function to generate the base configuration options
+            function getBaseOptions() {
+                return {
+                    renderers: renderers,
+                    rendererName: "Table", // Default for unknown data 
+                    onRefresh: function(config) {
+                        const configCopy = JSON.parse(JSON.stringify(config));
+                        delete configCopy["aggregators"];
+                        delete configCopy["renderers"];
+                        delete configCopy["dataClass"];
+                        delete configCopy["onRefresh"]; 
+                        
+                        try {
+                            localStorage.setItem(configStorageKey, JSON.stringify(configCopy));
+                        } catch (e) {
+                            console.error("Failed to save state to localStorage", e);
+                        }
+
+                        // Wrap the table output to enable sticky headers CSS
+                        setTimeout(() => {
+                            const $table = $('table.pvtTable');
+                            if($table.length > 0 && !$table.parent().hasClass('pvtTableWrapper')) {
+                                $table.wrap('<div class="pvtTableWrapper"></div>');
+                            }
+                        }, 50);
+                    }
+                };
+            }
+
+            // Analyze CSV columns to auto-generate a suitable pivot layout
+            function analyzeColumns(data, preferredNumericCols) {
+                const keys = Object.keys(data[0]);
+                const result = { dateCol: null, valueCols: [], lowCardCols: [], highCardCols: [], idCols: [] };
+                const totalRows = data.length;
+
+                keys.forEach(key => {
+                    const nonEmpty = data.filter(r => r[key] !== null && r[key] !== undefined && r[key] !== '');
+                    if (nonEmpty.length === 0) return;
+
+                    // Financial columns (comma-formatted numbers that were converted)
+                    if (preferredNumericCols.includes(key)) {
+                        result.valueCols.push(key);
+                        return;
+                    }
+
+                    // Date columns
+                    const dateCount = nonEmpty.filter(r => {
+                        const v = String(r[key]).trim();
+                        return /^\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4}$/.test(v) ||
+                               /^\d{4}[-\/]\d{1,2}[-\/]\d{1,2}$/.test(v);
+                    }).length;
+                    if (dateCount / nonEmpty.length >= 0.8) {
+                        if (!result.dateCol) result.dateCol = key;
+                        return;
+                    }
+
+                    // Numeric columns (IDs like Master Number, Project Code)
+                    if (nonEmpty.every(r => typeof r[key] === 'number')) {
+                        result.idCols.push(key);
+                        return;
+                    }
+
+                    // Text columns — classify by cardinality
+                    const uniqueVals = new Set(nonEmpty.map(r => r[key])).size;
+                    if (uniqueVals <= Math.max(totalRows * 0.5, 20)) {
+                        result.lowCardCols.push(key);
+                    } else {
+                        result.highCardCols.push(key);
+                    }
+                });
+
+                return result;
+            }
+
+            // Centralized function to render the Pivot Table
+            function renderPivot(data, preferredNumericCols = []) {
+                let options = getBaseOptions();
+                
+                // If it's a new CSV upload, clear old layout state to avoid column mismatch errors
+                localStorage.removeItem(configStorageKey);
+
+                // Smart auto-layout based on column analysis
+                if (data.length > 0) {
+                    const analysis = analyzeColumns(data, preferredNumericCols);
+
+                    // Values: last financial column (typically the grand total in financial data)
+                    if (analysis.valueCols.length > 0) {
+                        options.vals = [analysis.valueCols[analysis.valueCols.length - 1]];
+                        options.aggregatorName = "Sum";
+                    }
+
+                    // Rows: prefer low-cardinality categorical (best for grouping)
+                    // Fall back to high-cardinality text if nothing else available
+                    if (analysis.lowCardCols.length > 0) {
+                        options.rows = [analysis.lowCardCols[0]];
+                    } else if (analysis.highCardCols.length > 0) {
+                        options.rows = [analysis.highCardCols[0]];
+                    }
+
+                    // Cols: date column if available, otherwise second low-cardinality column
+                    if (analysis.dateCol) {
+                        options.cols = [analysis.dateCol];
+                    } else if (analysis.lowCardCols.length > 1) {
+                        options.cols = [analysis.lowCardCols[1]];
+                    }
+                }
+
+                // Render the Pivot Table (3rd arg = overwrite existing pivot when re-rendering)
+                $("#pivot-table-output").pivotUI(data, options, true);
+            }
+
+            // Show an empty state placeholder initially
+            $("#pivot-table-output").html(
+                '<div id="empty-state-upload" style="text-align: center; padding: 4rem 2rem; color: var(--text-muted); border: 2px dashed var(--border-light); border-radius: 8px; margin-top: 1rem; cursor: pointer; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor=\'var(--bg-body)\'" onmouseout="this.style.backgroundColor=\'transparent\'">' +
+                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="48" height="48" style="margin-bottom: 1rem; opacity: 0.5;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>' +
+                '<h3 style="color: var(--text-main); font-size: 1.25rem; font-weight: 600;">No Data Loaded</h3>' +
+                '<p style="margin-top: 0.5rem;">Click here or the "Upload CSV File" button above to generate a pivot table.</p>' +
+                '</div>'
+            );
+
+            // Allow user to click the empty state to trigger upload
+            $(document).on('click', '#empty-state-upload', function() {
+                $('#csv-file-input').click();
+            });
+
+            // Handle CSV Import Button Click
+            $('#btn-import-csv').click(function() {
+                $('#csv-file-input').click();
+            });
+
+            // Handle CSV Export Button Click
+            $('#btn-export-csv').click(function() {
+                // If we are currently viewing the Raw Data (Long Table), export from Tabulator
+                if (!isPivotView) {
+                    if (window.tabulatorTable) {
+                        // Use Tabulator's built-in CSV download function
+                        window.tabulatorTable.download("csv", "raw_data_export.csv");
+                    } else {
+                        alert("No raw data available to export.");
+                    }
+                    return;
+                }
+
+                // Otherwise, export the Pivot Table view
+                const $table = $('table.pvtTable');
+                if ($table.length === 0) {
+                    alert("No pivot table to export. Please upload data first.");
+                    return;
+                }
+
+                const grid = [];
+                const $rows = $table.find('tr');
+                
+                $rows.each(function(rowIndex) {
+                    if (!grid[rowIndex]) grid[rowIndex] = [];
+                    let colIndex = 0;
+                    
+                    $(this).find('th, td').each(function() {
+                        // Find the next available empty slot in this row's grid
+                        while (grid[rowIndex][colIndex] !== undefined) {
+                            colIndex++;
+                        }
+                        
+                        let text = $(this).text().trim();
+                        text = '"' + text.replace(/"/g, '""') + '"'; // Escape quotes for CSV
+                        
+                        const rowspan = parseInt($(this).attr('rowspan')) || 1;
+                        const colspan = parseInt($(this).attr('colspan')) || 1;
+                        
+                        // Fill the grid according to row/col spans
+                        for (let r = 0; r < rowspan; r++) {
+                            for (let c = 0; c < colspan; c++) {
+                                if (!grid[rowIndex + r]) grid[rowIndex + r] = [];
+                                
+                                // Place the actual text only in the top-left cell of the spanned area
+                                if (r === 0 && c === 0) {
+                                    grid[rowIndex + r][colIndex + c] = text;
+                                } else {
+                                    // For spanned cells, keep them empty in the CSV to maintain structure
+                                    grid[rowIndex + r][colIndex + c] = '""'; 
+                                }
+                            }
+                        }
+                        colIndex += colspan; // Move pointer forward by colspan
+                    });
+                });
+
+                // Convert the 2D grid array into a CSV formatted string
+                const csvContent = grid.map(row => {
+                    // Ensure there are no completely undefined holes in the array
+                    for (let i = 0; i < row.length; i++) {
+                        if (row[i] === undefined) row[i] = '""';
+                    }
+                    return row.join(',');
+                }).join('\n');
+
+                // Trigger the file download
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.setAttribute("href", url);
+                link.setAttribute("download", "pivot_export.csv");
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+
+            // Handle Chart Export Button Click
+            $('#btn-export-png').click(function() {
+                const $chart = $('.js-plotly-plot');
+                if ($chart.length === 0) {
+                    alert("No chart available to export. Please select a chart renderer (e.g., Bar Chart, Line Chart) first.");
+                    return;
+                }
+                
+                // Plotly is attached to the DOM element
+                const chartElement = $chart[0];
+                Plotly.downloadImage(chartElement, {
+                    format: 'png',
+                    filename: 'pivot_chart_export'
+                });
+            });
+
+            // Handle CSV File Selection and Parsing
+            $('#csv-file-input').change(function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const $statusText = $('#data-status span:last-child');
+                const $statusDot = $('#data-status .status-dot');
+
+                $statusText.text('Parsing ' + file.name + '...').css('color', 'var(--primary)');
+                $statusDot.removeClass('active error').addClass('loading');
+
+                Papa.parse(file, {
+                    header: true,
+                    dynamicTyping: true, // Automatically convert numbers and booleans
+                    skipEmptyLines: 'greedy', // Completely ignores empty rows or rows with only whitespace
+                    complete: function(results) {
+                        
+                        const criticalErrors = results.errors.filter(err => err.code !== "TooFewFields" && err.code !== "TooManyFields");
+                        
+                        if (criticalErrors.length > 0) {
+                            console.error('Critical CSV Parsing Errors:', criticalErrors);
+                            $statusText.text('Error parsing CSV. Check console.').css('color', '#ef4444');
+                            $statusDot.removeClass('loading').addClass('error');
+                            return;
+                        } 
+                        
+                        let rawData = results.data;
+
+                        // 1. Data Cleaning: Remove entirely empty columns
+                        if (rawData.length > 0) {
+                            // Find columns where ALL rows have null, undefined, or empty string
+                            const allKeys = Object.keys(rawData[0]);
+                            const emptyKeys = allKeys.filter(key => {
+                                // Check if this specific key is empty across every single row
+                                return rawData.every(row => row[key] === null || row[key] === undefined || row[key] === '');
+                            });
+
+                            // If we found completely empty columns, delete them from every row
+                            if (emptyKeys.length > 0) {
+                                console.log(`Cleaned up ${emptyKeys.length} completely empty columns:`, emptyKeys);
+                                rawData.forEach(row => {
+                                    emptyKeys.forEach(key => delete row[key]);
+                                });
+                            }
+                        }
+
+                        // 2. Data Cleaning: Remove junk/unnamed columns (e.g. "_1", "_2", "__parsed_extra")
+                        if (rawData.length > 0) {
+                            const junkKeys = Object.keys(rawData[0]).filter(key =>
+                                /^_\d*$/.test(key) || key === '__parsed_extra' || key.trim() === ''
+                            );
+                            if (junkKeys.length > 0) {
+                                console.log(`Cleaned up ${junkKeys.length} junk columns:`, junkKeys);
+                                rawData.forEach(row => {
+                                    junkKeys.forEach(key => delete row[key]);
+                                });
+                            }
+                        }
+
+                        // 3. Data Cleaning: Convert comma-formatted number strings to actual numbers
+                        //    e.g. "86,116.00" → 86116.00, "1,318,453.98" → 1318453.98
+                        //    Track which columns were converted so we can prioritize them for aggregation
+                        const convertedNumericCols = [];
+                        if (rawData.length > 0) {
+                            const remainingKeys = Object.keys(rawData[0]);
+                            remainingKeys.forEach(key => {
+                                // Check if a majority of non-empty values in this column look like comma-formatted numbers
+                                const nonEmpty = rawData.filter(row => row[key] !== null && row[key] !== undefined && row[key] !== '');
+                                if (nonEmpty.length === 0) return;
+                                const looksNumeric = nonEmpty.filter(row => {
+                                    // Skip values already converted to numbers by dynamicTyping
+                                    // (e.g. Master Number "4" → 4). Only match string values
+                                    // that contain commas or decimals (actual formatted numbers).
+                                    if (typeof row[key] !== 'string') return false;
+                                    const val = row[key].trim();
+                                    return /^-?[\d,]+(\.\d+)?$/.test(val);
+                                });
+                                // If at least 80% of non-empty values match, convert the whole column
+                                if (looksNumeric.length / nonEmpty.length >= 0.8) {
+                                    convertedNumericCols.push(key);
+                                    rawData.forEach(row => {
+                                        if (row[key] !== null && row[key] !== undefined && row[key] !== '') {
+                                            const parsed = parseFloat(String(row[key]).replace(/,/g, ''));
+                                            if (!isNaN(parsed)) {
+                                                row[key] = parsed;
+                                            }
+                                        }
+                                    });
+                                }
+                            });
+                        }
+
+                        // 4. Data Cleaning: Remove rows that managed to slip through but have no useful data
+                        const cleanedData = rawData.filter(row => {
+                            // Check if the row has at least one value that isn't null/empty
+                            return Object.values(row).some(val => val !== null && val !== undefined && val !== '');
+                        });
+
+                        if (cleanedData.length === 0) {
+                            $statusText.text('CSV file contains no readable data.').css('color', '#ef4444');
+                            $statusDot.removeClass('loading').addClass('error');
+                            return;
+                        }
+
+                        // Render with the cleaned dataset
+                                                window.appData = cleanedData;
+                        renderPivot(cleanedData, convertedNumericCols);
+                        
+                        // Show the toggle button since we have data
+                        $('#btn-toggle-view').show();
+                        
+                        // If currently in raw data view, update tabulator
+                        if (!isPivotView && window.tabulatorTable) {
+                             window.tabulatorTable.setData(window.appData);
+                        }
+
+                        
+                        // Update UI Status
+                        const recordCount = cleanedData.length.toLocaleString();
+                        $statusText
+                            .text(`Loaded ${recordCount} clean rows from ${file.name}`)
+                            .css('color', 'var(--text-muted)');
+                        $statusDot.removeClass('loading error').addClass('active');
+                            
+                        // Reset input so the same file can be selected again if needed
+                        $('#csv-file-input').val('');
+                    },
+                    error: function(err) {
+                        console.error('Fatal PapaParse Error:', err);
+                        $statusText.text('Fatal Error parsing CSV.').css('color', '#ef4444');
+                        $statusDot.removeClass('loading').addClass('error');
+                    }
+                });
+            });
+
+            // Inject "Search" into PivotTable Filter Box UX Hack
+            $(document).on('click', '.pvtTriangle', function() {
+                setTimeout(function() {
+                    const $box = $('.pvtFilterBox:visible');
+                    // Check if box exists and doesn't already have our search input
+                    if ($box.length && !$box.find('.custom-filter-search').length) {
+                        const $search = $('<input type="text" class="custom-filter-search" placeholder="Search attributes...">');
+                        
+                        // Search functionality
+                        $search.on('keyup', function() {
+                            const val = $(this).val().toLowerCase();
+                            $box.find('.pvtCheckContainer p').each(function() {
+                                const text = $(this).text().toLowerCase();
+                                $(this).toggle(text.indexOf(val) > -1);
+                            });
+                        });
+                        
+                        // Insert after the title
+                        $box.find('h4').after($search);
+                        $search.focus();
+                    }
+                }, 50); // slight delay to allow PivotTable.js to render the modal
+            });
+
+            // Handle View Toggle Button Click
+            $('#btn-toggle-view').click(function() {
+                if (window.appData.length === 0) return;
+                
+                const $btnText = $(this).find('span');
+                const $btnIcon = $(this).find('svg');
+                
+                isPivotView = !isPivotView;
+                
+                if (isPivotView) {
+                    // Switch to Pivot Table View
+                    $('#long-table-output').hide();
+                    $('#pivot-table-output').fadeIn(200);
+                    $btnText.text('View Raw Data');
+                    $btnIcon.html('<rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line>'); // Table icon
+                } else {
+                    // Switch to Long Table (Raw Data) View
+                    $('#pivot-table-output').hide();
+                    $('#long-table-output').fadeIn(200);
+                    $btnText.text('View Pivot Table');
+                    $btnIcon.html('<rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line><line x1="15" y1="3" x2="15" y2="9"></line>'); // Pivot icon (modified table)
+                    
+                    // Initialize or update Tabulator
+                    if (!window.tabulatorTable) {
+                        window.tabulatorTable = new Tabulator("#long-table-output", {
+                            data: window.appData,
+                            autoColumns: true, // Automatically generate columns from the data keys
+                            layout: "fitDataFill", // Fit columns to data width
+                            pagination: "local", // Enable local pagination
+                            paginationSize: 50, // 50 rows per page
+                            paginationSizeSelector: [25, 50, 100, true], // Allow user to change page size
+                            movableColumns: true, // Allow user to drag and drop columns
+                            resizableColumnFit: true,
+                        });
+                    } else {
+                        window.tabulatorTable.setData(window.appData);
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
