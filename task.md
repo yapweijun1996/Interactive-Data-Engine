@@ -106,8 +106,8 @@
 - **Why:** Power users need more control over data inspection.
 
 ### Task 15: Code Architecture Refactor
-- [ ] Split into separate files: `styles.css`, `app.js`, `data-utils.js`
-- [ ] Add error boundaries / try-catch for Plotly and Tabulator
+- [x] Split into separate files: `styles.css`, `app.js`, `data-utils.js`
+- [x] Add error boundaries / try-catch for Plotly and Tabulator
 - [ ] Add localStorage quota check before saving
 - **Why:** 1,750 lines in one file is hard to maintain.
 
@@ -134,3 +134,15 @@
 - [x] Fix: Duplicate renderer dropdown (clear host before move)
 - [x] UI: Toolbar redesign (ghost buttons, container background)
 - [x] UI: Renderer dropdown moved to top position
+
+### Error Boundaries (2026-04-07)
+- [x] Added `showError()` utility for unified error display in status bar
+- [x] Wrapped data cleaning pipeline with fallback to raw data
+- [x] Wrapped column analysis with empty-data guard + fallback
+- [x] Wrapped pivot render with inline error message fallback
+- [x] Wrapped pivot `onRefresh` DOM layout manipulations
+- [x] Wrapped CSV file processing pipeline (complete callback)
+- [x] Wrapped Tabulator init, search filter, and column toggle
+- [x] Wrapped CSV export (pivot + raw data) and Plotly PNG export
+- [x] Wrapped view toggle and filter box positioning
+- [x] Protected `localStorage` operations (setItem already had try-catch, added removeItem)

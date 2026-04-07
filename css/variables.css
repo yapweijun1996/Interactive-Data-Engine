@@ -1,0 +1,25 @@
+:root {
+    /* Light Theme Variables */
+    --bg-body: #f1f5f9;
+    --bg-card: #ffffff;
+    --primary: #2563eb;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --border-light: #e2e8f0;
+    --table-header: #f8fafc;
+    --primary-hover: #1d4ed8;
+    --success: #10b981;
+
+    /* Pivot Table Specific Variables */
+    --pvt-dropzone-bg: #f8fafc;
+    --pvt-dropzone-border: #cbd5e1;
+    --pvt-pill-bg: #ffffff;
+    --pvt-pill-text: #1e293b;
+    --pvt-pill-border: #e2e8f0;
+    --pvt-pill-active-bg: #eff6ff;
+    --pvt-pill-active-border: #bfdbfe;
+    --pvt-pill-active-text: #1e40af;
+    --pvt-pill-filtered-bg: #fffbeb;
+    --pvt-pill-filtered-border: #fcd34d;
+    --pvt-pill-filtered-text: #b45309;
+}

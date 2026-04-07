@@ -1,0 +1,591 @@
+/* ==========================================================================
+   ADVANCED UI LOGIC FOR PIVOTTABLE.JS
+
+   IMPORTANT: These styles work with PivotTable.js's NATIVE DOM structure.
+   We do NOT rearrange the DOM in JS — only CSS is used for layout.
+
+   PivotTable.js native structure (varies slightly by version):
+     Row 0: td(renderer) | td.pvtVals         | td.pvtCols
+     Row 1: td.pvtUnused | td.pvtRows          | td.pvtRendererArea
+   ========================================================================== */
+
+/* Convert pvtUi from <table> layout to CSS Grid for full layout control.
+   PivotTable.js generates a <table> but we override its display model. */
+.pvtUi {
+    font-family: 'Inter', sans-serif;
+    width: 100%;
+    display: block !important;
+}
+
+.pvtUi > tbody {
+    display: grid;
+    grid-template-columns: 200px 250px 1fr;
+    gap: 0.5rem;
+}
+
+.pvtUi > tbody > tr {
+    display: contents;
+}
+
+/* Hide renderer cell — its dropdown is moved to toolbar by JS.
+   Hidden immediately via CSS to prevent flash of unstyled content. */
+td.pvtUiCell:not(.pvtVals):not(.pvtAxisContainer) {
+    display: none !important;
+}
+
+/* Also hide the renderer dropdown inside pvtUi (before JS moves it) */
+.pvtUi select.pvtRenderer {
+    display: none;
+}
+
+/* Grid placement — explicit positions for each zone */
+td.pvtAxisContainer.pvtUnused { grid-column: 1; grid-row: 1 / 3; }
+td.pvtVals                    { grid-column: 2; grid-row: 1; }
+td.pvtAxisContainer.pvtCols   { grid-column: 3; grid-row: 1; }
+td.pvtAxisContainer.pvtRows   { grid-column: 2; grid-row: 2; }
+td.pvtRendererArea            { grid-column: 3; grid-row: 2; }
+
+/* Drop Zone Section Labels */
+td.pvtAxisContainer::before,
+td.pvtVals::before {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+    opacity: 0.7;
+}
+td.pvtAxisContainer.pvtUnused::before { content: "Available Fields"; }
+td.pvtAxisContainer.pvtRows::before { content: "Row Fields"; }
+td.pvtAxisContainer.pvtCols::before { content: "Column Fields"; }
+td.pvtVals::before { content: "Values"; }
+
+/* Drop Zones — shared base style */
+td.pvtVals,
+td.pvtAxisContainer {
+    background: var(--pvt-dropzone-bg);
+    border: 1px dashed var(--pvt-dropzone-border);
+    border-radius: 8px;
+    padding: 0.75rem;
+    transition: background-color 0.2s;
+}
+
+td.pvtAxisContainer:hover {
+    background: var(--bg-body);
+}
+
+/* Available Fields panel */
+td.pvtAxisContainer.pvtUnused {
+    max-height: 420px;
+    overflow-y: auto;
+}
+
+/* Values cell — flex layout for aggregator controls */
+td.pvtVals {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    align-content: flex-start;
+}
+
+td.pvtVals > br {
+    display: none;
+}
+
+/* Column Fields */
+td.pvtAxisContainer.pvtCols {
+    min-width: 150px;
+}
+
+/* Renderer output area */
+td.pvtRendererArea {
+    padding: 0;
+}
+
+/* ---- Draggable Pills ---- */
+.pvtAttr {
+    background: var(--pvt-pill-bg);
+    border: 1px solid var(--pvt-pill-border);
+    color: var(--pvt-pill-text);
+    font-weight: 500;
+    font-size: 0.8125rem;
+    padding: 0.35rem 0.5rem 0.35rem 0.35rem;
+    border-radius: 6px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    margin: 0.25rem;
+    cursor: grab;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-flex;
+    align-items: center;
+    user-select: none;
+}
+
+.pvtAttr::before {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 14px;
+    margin-right: 6px;
+    background-image: radial-gradient(var(--text-muted) 1px, transparent 0);
+    background-size: 4px 4px;
+    background-position: left center;
+    background-repeat: repeat;
+    opacity: 0.4;
+    transition: opacity 0.2s;
+}
+
+.pvtAttr:hover {
+    border-color: var(--primary);
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.05);
+    transform: translateY(-1px);
+}
+
+.pvtAttr:hover::before {
+    opacity: 0.8;
+    background-image: radial-gradient(var(--primary) 1px, transparent 0);
+}
+
+.pvtAttr:active {
+    cursor: grabbing;
+    transform: translateY(0);
+}
+
+/* Active pills in Rows/Cols */
+.pvtRows .pvtAttr, .pvtCols .pvtAttr {
+    background: var(--pvt-pill-active-bg);
+    border-color: var(--pvt-pill-active-border);
+    color: var(--pvt-pill-active-text);
+}
+.pvtRows .pvtAttr::before, .pvtCols .pvtAttr::before {
+    background-image: radial-gradient(var(--primary) 1px, transparent 0);
+    opacity: 0.6;
+}
+
+/* Filtered pills */
+.pvtAttr.pvtFilteredAttribute {
+    background: var(--pvt-pill-filtered-bg);
+    border-color: var(--pvt-pill-filtered-border);
+    color: var(--pvt-pill-filtered-text);
+}
+.pvtAttr.pvtFilteredAttribute::before {
+     background-image: radial-gradient(#fbbf24 1px, transparent 0);
+}
+
+/* Filter triangle */
+.pvtTriangle {
+    margin-left: 6px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.pvtRows .pvtAttr .pvtTriangle, .pvtCols .pvtAttr .pvtTriangle {
+    color: var(--primary);
+}
+
+.pvtAttr.pvtFilteredAttribute .pvtTriangle {
+    color: #d97706;
+}
+
+.pvtTriangle:hover {
+    background-color: rgba(150,150,150,0.15);
+    color: var(--text-main) !important;
+}
+
+/* ---- Drag and Drop Visual Helpers ---- */
+.ui-sortable-helper {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+    transform: rotate(3deg) scale(1.05) !important;
+    cursor: grabbing !important;
+    z-index: 1000 !important;
+    opacity: 0.95;
+    background: var(--bg-card) !important;
+}
+
+.ui-sortable-placeholder {
+    background: rgba(37, 99, 235, 0.05) !important;
+    border: 2px dashed var(--primary) !important;
+    border-radius: 6px !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    margin: 0.25rem !important;
+    height: 32px !important;
+    width: 80px !important;
+}
+
+/* ---- Dropdowns ---- */
+.pvtAggregator, .pvtRenderer, .pvtAttrDropdown {
+    font-family: inherit;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    border: 1px solid var(--border-light);
+    border-radius: 6px;
+    padding: 0.5rem 2rem 0.5rem 0.75rem;
+    margin-bottom: 0.5rem;
+    background-color: var(--bg-card);
+    color: var(--text-main);
+    outline: none;
+    transition: all 0.2s;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.6rem center;
+    background-size: 1em;
+    width: 100%;
+    max-width: 100%;
+}
+
+.pvtAggregator:focus, .pvtRenderer:focus, .pvtAttrDropdown:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%232563eb'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+}
+
+/* Aggregator takes full width row */
+.pvtAggregator {
+    flex: 0 0 100%;
+}
+
+/* Attribute dropdown fills remaining space next to arrows */
+.pvtAttrDropdown {
+    flex: 1 1 0;
+    min-width: 0;
+    width: auto;
+    max-width: none;
+    margin-bottom: 0;
+}
+
+/* Sorting Arrows (RowOrder and ColOrder) */
+.pvtRowOrder, .pvtColOrder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 32px;
+    width: 32px;
+    border-radius: 6px;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-light);
+    color: var(--text-muted);
+    font-size: 1.125rem;
+    font-weight: bold;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.pvtRowOrder:hover, .pvtColOrder:hover {
+    background-color: var(--bg-body);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+/* ---- Data Table (With Sticky Headers) ---- */
+.pvtTableWrapper {
+    max-height: calc(100vh - 300px);
+    min-height: 200px;
+    overflow: auto;
+    border-radius: 6px;
+    border: 1px solid var(--border-light);
+}
+
+table.pvtTable {
+    font-family: inherit;
+    font-size: 0.8125rem;
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    margin-top: 0;
+    table-layout: auto;
+}
+
+/* Sticky Headers */
+table.pvtTable thead tr th, table.pvtTable tbody tr th {
+    background-color: var(--table-header);
+    border-bottom: 1px solid var(--border-light);
+    border-right: 1px solid var(--border-light);
+    color: var(--text-muted);
+    font-weight: 600;
+    padding: 0.6rem 0.8rem;
+    text-align: left;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    font-size: 0.7rem;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+table.pvtTable tbody tr th {
+    left: 0;
+    z-index: 20;
+}
+
+table.pvtTable thead tr th.pvtAxisLabel {
+    z-index: 30;
+    left: 0;
+}
+
+table.pvtTable tbody tr td {
+    border-bottom: 1px solid var(--border-light);
+    border-right: 1px solid var(--border-light);
+    padding: 0.6rem 0.8rem;
+    color: var(--text-main);
+    text-align: right;
+    transition: background-color 0.15s;
+    background-color: var(--bg-card);
+}
+
+table.pvtTable tbody tr:nth-child(even) td {
+    background-color: #fafbfc;
+}
+
+table.pvtTable tbody tr:hover td {
+    background-color: var(--pvt-dropzone-bg);
+}
+
+.pvtTotal, .pvtTotalLabel, .pvtGrandTotal {
+    font-weight: 700 !important;
+    background-color: var(--pvt-dropzone-bg) !important;
+    color: var(--text-main) !important;
+}
+
+/* ---- Filter Box / Modal ---- */
+.pvtFilterBox {
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.05);
+    padding: 1.25rem;
+    z-index: 1000 !important;
+    color: var(--text-main);
+    min-width: 280px;
+    max-width: 320px;
+    font-family: 'Inter', sans-serif;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.12s ease;
+}
+.pvtFilterBox.pvt-ready {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.pvtFilterBox h4 {
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.pvtFilterBox h4 span.count {
+    background: var(--bg-body);
+    color: var(--text-muted);
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.pvtFilterBox > p:first-of-type {
+    margin: 0 0 0.75rem 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.pvtFilterBox input.pvtSearch {
+    width: 100%;
+    flex: 0 0 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border-light);
+    border-radius: 6px;
+    background: var(--bg-body);
+    color: var(--text-main);
+    font-family: inherit;
+    font-size: 0.8125rem;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.pvtFilterBox input.pvtSearch:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+    background: var(--bg-card);
+}
+
+.pvtFilterBox > p:first-of-type button {
+    background: transparent;
+    border: none;
+    color: var(--primary);
+    font-weight: 500;
+    font-size: 0.75rem;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    box-shadow: none;
+}
+.pvtFilterBox > p:first-of-type button:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+.pvtFilterBox > p:first-of-type br { display: none; }
+
+.pvtCheckContainer {
+    max-height: 240px;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+    border: 1px solid var(--border-light);
+    border-radius: 6px;
+    padding: 0.25rem;
+    margin-bottom: 1rem;
+    background: var(--bg-card);
+}
+
+.pvtCheckContainer p {
+    margin: 0;
+}
+
+.pvtCheckContainer label {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.15s;
+    font-size: 0.8125rem;
+    color: var(--text-main);
+}
+
+.pvtCheckContainer label:hover {
+    background-color: var(--bg-body);
+}
+
+.pvtCheckContainer input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    min-width: 16px;
+    flex-shrink: 0;
+    border: 1px solid var(--text-muted);
+    border-radius: 4px;
+    margin-right: 0.75rem;
+    display: grid;
+    place-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background-color: var(--bg-card);
+}
+
+.pvtCheckContainer input[type="checkbox"]::before {
+    content: "";
+    width: 10px;
+    height: 10px;
+    clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+    transform: scale(0);
+    transform-origin: bottom left;
+    transition: 120ms transform ease-in-out;
+    box-shadow: inset 1em 1em white;
+    background-color: white;
+}
+
+.pvtCheckContainer input[type="checkbox"]:checked {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.pvtCheckContainer input[type="checkbox"]:checked::before {
+    transform: scale(1);
+}
+
+.pvtCheckContainer label span.value {
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pvtCheckContainer label span.count {
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    background: var(--bg-body);
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    margin-left: 0.5rem;
+}
+
+.pvtFilterBox > p:last-of-type {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin: 0;
+}
+
+.pvtFilterBox > p:last-of-type button {
+    padding: 0.4rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 500;
+    font-size: 0.8125rem;
+    transition: all 0.2s;
+    border: 1px solid var(--border-light);
+}
+
+.pvtFilterBox > p:last-of-type button:last-child {
+    background: var(--bg-card);
+    color: var(--text-main);
+}
+.pvtFilterBox > p:last-of-type button:last-child:hover {
+    background: var(--bg-body);
+}
+
+.pvtFilterBox > p:last-of-type button:first-child {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+.pvtFilterBox > p:last-of-type button:first-child:hover {
+    background: var(--primary-hover);
+}
+
+/* ---- Plotly Chart Overrides ---- */
+.js-plotly-plot .plotly .main-svg {
+    border-radius: 6px;
+}
+
+/* ---- Hide/Show UI Toggle ---- */
+#pivot-table-output.pivot-ui-hidden td.pvtAxisContainer.pvtUnused,
+#pivot-table-output.pivot-ui-hidden td.pvtUiCell {
+    display: none;
+}
+
+/* ---- Renderer dropdown in header toolbar ---- */
+#renderer-host .pvtRenderer {
+    margin-bottom: 0;
+    width: auto;
+    min-width: 160px;
+}
+#renderer-host:empty {
+    display: none;
+}
