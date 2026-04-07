@@ -14,7 +14,12 @@
     font-family: 'Inter', sans-serif;
     width: 100%;
     border-spacing: 0.5rem;
+    table-layout: fixed;
 }
+
+col.ide-col-unused { width: 220px; }
+col.ide-col-vals   { width: 280px; }
+col.ide-col-rest   { width: auto; }
 
 
 /* Drop Zone Section Labels */
@@ -69,6 +74,7 @@ td.pvtVals > br {
 /* Column Fields */
 td.pvtAxisContainer.pvtCols {
     min-width: 150px;
+    vertical-align: top;
 }
 
 /* Renderer output area */
@@ -271,8 +277,6 @@ td.pvtRendererArea {
     max-height: calc(100vh - 300px);
     min-height: 200px;
     overflow: auto;
-    border-radius: 6px;
-    border: 1px solid var(--border-light);
 }
 
 table.pvtTable {
@@ -548,7 +552,17 @@ table.pvtTable tbody tr:hover td {
 
 /* ---- Hide/Show UI Toggle ---- */
 #pivot-table-output.pivot-ui-hidden td.pvtAxisContainer.pvtUnused,
-#pivot-table-output.pivot-ui-hidden td.pvtUiCell {
+#pivot-table-output.pivot-ui-hidden td.pvtVals,
+#pivot-table-output.pivot-ui-hidden td.pvtAxisContainer.pvtRows,
+#pivot-table-output.pivot-ui-hidden td.pvtAxisContainer.pvtCols {
+    display: none;
+}
+
+#pivot-table-output.pivot-ui-hidden .pvtUi {
+    table-layout: auto;
+}
+
+#pivot-table-output.pivot-ui-hidden .pvtUi colgroup {
     display: none;
 }
 

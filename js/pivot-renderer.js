@@ -56,6 +56,17 @@ $(document).ready(function() {
                         $emptyCell.replaceWith($unused);
                     }
 
+                    // Add colgroup for column width control
+                    if ($pvtUi.length && !$pvtUi.find('colgroup.ide-cols').length) {
+                        $pvtUi.prepend(
+                            '<colgroup class="ide-cols">' +
+                            '<col class="ide-col-unused">' +
+                            '<col class="ide-col-vals">' +
+                            '<col class="ide-col-rest">' +
+                            '</colgroup>'
+                        );
+                    }
+
                 } catch (err) {
                     console.error('[IDE Pivot Layout]', err);
                 }
