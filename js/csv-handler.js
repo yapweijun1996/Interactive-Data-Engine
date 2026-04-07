@@ -100,8 +100,7 @@ $(document).ready(function() {
         });
     });
 
-    // Handle Load Sample Data Button
-    $('#btn-load-sample').click(function() {
+    function loadSampleData() {
         var $statusText = $('#data-status span:last-child');
         var $statusDot = $('#data-status .status-dot');
 
@@ -122,6 +121,14 @@ $(document).ready(function() {
                 $statusDot.removeClass('loading').addClass('error');
             }
         });
+    }
+
+    // Handle Load Sample Data Button
+    $('#btn-load-sample').click(function() {
+        loadSampleData();
     });
+
+    // Auto-load sample data on page refresh/load
+    loadSampleData();
 
 });

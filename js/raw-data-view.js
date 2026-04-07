@@ -19,7 +19,6 @@ $(document).ready(function() {
 
         if (window.IDE.tabulatorTable && currentSchemaSignature === nextSchemaSignature) {
             window.IDE.tabulatorTable.setData(window.IDE.appData);
-            window.IDE.lastDataSchemaSignature = nextSchemaSignature;
             return;
         }
 
@@ -68,8 +67,6 @@ $(document).ready(function() {
                 headerSort: true,
             },
         });
-
-        window.IDE.lastDataSchemaSignature = nextSchemaSignature;
 
         } catch (err) {
             window.IDE.showError('Raw Data View', err);

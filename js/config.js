@@ -10,7 +10,6 @@ window.IDE = {
     tabulatorTable: null,
     isPivotView: true,
     configStorageKey: 'pivotAdvancedConfig_v2',
-    lastDataSchemaSignature: '',
     renderers: null,  // set in document.ready when jQuery plugins are available
 
     /**
