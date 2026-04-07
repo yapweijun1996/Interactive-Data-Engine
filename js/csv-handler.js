@@ -108,7 +108,7 @@ $(document).ready(function() {
         $statusText.text('Loading sample data...').css('color', 'var(--primary)');
         $statusDot.removeClass('active error').addClass('loading');
 
-        Papa.parse('Sales_Invoice_Report.csv', {
+        Papa.parse('sample-csv/Sales_Invoice_Report.csv', {
             download: true,
             header: true,
             dynamicTyping: true,
