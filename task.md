@@ -106,8 +106,11 @@
 - **Why:** Power users need more control over data inspection.
 
 ### Task 15: Code Architecture Refactor
-- [x] Split into separate files: `styles.css`, `app.js`, `data-utils.js`
-- [x] Add error boundaries / try-catch for Plotly and Tabulator
+- [x] Split 1,773-line monolith into 5 CSS + 8 JS modules
+- [x] Add `window.IDE` namespace for shared state
+- [x] Add error boundaries / try-catch for all modules
+- [x] Add `colgroup` for pivot table column width control
+- [x] CSS-only styling for PivotTable.js native DOM (no fragile DOM manipulation)
 - [ ] Add localStorage quota check before saving
 - **Why:** 1,750 lines in one file is hard to maintain.
 
@@ -146,3 +149,16 @@
 - [x] Wrapped CSV export (pivot + raw data) and Plotly PNG export
 - [x] Wrapped view toggle and filter box positioning
 - [x] Protected `localStorage` operations (setItem already had try-catch, added removeItem)
+
+### Code Refactor (2026-04-07)
+- [x] Split `index.html` (1,773 lines) into 5 CSS files + 8 JS modules
+- [x] Created `window.IDE` namespace for shared state (replaces scattered globals)
+- [x] Extracted: config, column-analysis, data-cleaning, pivot-renderer, csv-handler, export-handler, raw-data-view, ui-controls
+- [x] CSS files: variables, layout, pivot, components, tabulator-custom
+- [x] Added "Load Sample Data" button with auto-load on page open
+- [x] Moved sample CSV to `sample-csv/` directory
+- [x] Renderer dropdown moved to toolbar immediately (no setTimeout flash)
+- [x] pvtUnused moved to TR0 with rowspan=2 via JS
+- [x] Added `colgroup` for pivot table column width control
+- [x] Hide UI toggle: only hides control zones, preserves data table
+- [x] CSS-only approach for PivotTable.js styling (no fragile DOM restructuring)

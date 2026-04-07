@@ -1,37 +1,86 @@
 # Interactive Data Engine
 
-A powerful, browser-based tool for advanced data analysis and visualization. The Interactive Data Engine allows you to upload CSV files, generate dynamic pivot tables, and create interactive charts entirely locally within your web browser.
+A powerful, browser-based tool for advanced data analysis and visualization. Upload CSV files, generate dynamic pivot tables, and create interactive charts — all processed locally in your browser with zero server dependencies.
 
 ## Features
 
-* **Client-Side Processing**: All data parsing and rendering happens in your browser. No data is sent to a server, ensuring your data remains private and secure.
-* **Advanced Pivot Tables**: Intuitive drag-and-drop interface to slice and dice your data using [PivotTable.js](https://pivottable.js.org/).
-* **Interactive Charting**: Built-in integration with [Plotly.js](https://plotly.com/javascript/) for rich, interactive data visualizations (Bar charts, Line charts, Scatter plots, etc.).
-* **Raw Data Viewer**: View, sort, and filter your raw uploaded data using a high-performance [Tabulator](https://tabulator.info/) grid.
-* **Smart Data Cleaning**: Automatically handles empty columns, junk columns, and formatting issues (like comma-separated financial numbers) upon upload.
-* **Export Capabilities**: 
-  * Export your pivot table configurations to CSV.
-  * Export generated charts to PNG images.
+- **Client-Side Processing** — All data parsing and rendering happens in your browser. No data is sent to any server, ensuring complete privacy.
+- **Smart Data Cleaning** — Automatically removes empty columns, junk columns (`_1`, `__parsed_extra`), and converts comma-formatted financial numbers (e.g. `86,116.00` → `86116.00`).
+- **Intelligent Auto-Layout** — Analyzes column types (date, numeric, categorical) and auto-configures the initial pivot table layout.
+- **Advanced Pivot Tables** — Drag-and-drop interface powered by [PivotTable.js](https://pivottable.js.org/) with 20+ aggregator functions (Sum, Average, Median, etc.).
+- **Interactive Charting** — 8+ chart types via [Plotly.js](https://plotly.com/javascript/) (Bar, Line, Scatter, Heatmap, Area, Pie, etc.).
+- **Raw Data Viewer** — Sortable, filterable, paginated data grid via [Tabulator](https://tabulator.info/) with global search and column visibility toggle.
+- **Sample Data** — One-click "Load Sample Data" button to explore the tool instantly.
+- **Export** — CSV export (pivot table or raw data) and PNG export (charts).
 
-## Technologies Used
+## Project Structure
 
-* **HTML5, CSS3, JavaScript** (Vanilla + jQuery)
-* **[PapaParse](https://www.papaparse.com/)**: For fast and reliable client-side CSV parsing.
-* **[PivotTable.js](https://pivottable.js.org/)**: The core drag-and-drop pivot table functionality.
-* **[Plotly.js](https://plotly.com/javascript/)**: For advanced rendering and interactive charting.
-* **[Tabulator](https://tabulator.info/)**: For displaying the raw data in a sortable, filterable table.
+```
+Interactive-Data-Engine/
+├── index.html                  # Main HTML entry point (~100 lines)
+├── css/
+│   ├── variables.css           # CSS custom properties / design tokens
+│   ├── layout.css              # Page layout (body, content-area, scrollbars)
+│   ├── pivot.css               # PivotTable.js UI customization
+│   ├── components.css          # Buttons, status indicators, upload header
+│   └── tabulator-custom.css    # Tabulator grid + raw data controls
+├── js/
+│   ├── config.js               # Global window.IDE namespace + shared state
+│   ├── column-analysis.js      # Column type detection (date/numeric/categorical)
+│   ├── data-cleaning.js        # CSV cleaning pipeline
+│   ├── pivot-renderer.js       # Pivot table config, rendering, layout fixes
+│   ├── csv-handler.js          # File upload, PapaParse parsing, sample data
+│   ├── export-handler.js       # CSV and PNG export logic
+│   ├── raw-data-view.js        # Tabulator grid, search, column toggle
+│   └── ui-controls.js          # Filter box positioning, UI/view toggle
+├── libs/
+│   ├── js/                     # jQuery, jQuery UI, PapaParse, PivotTable.js,
+│   │                           # Plotly.js, Plotly renderers, Tabulator
+│   ├── css/                    # PivotTable.js, Tabulator, Inter font styles
+│   └── fonts/                  # Inter font (WOFF2)
+├── sample-csv/
+│   └── Sales_Invoice_Report.csv  # Sample dataset (100 rows, 10 columns)
+├── task.md                     # Improvement roadmap
+└── README.md
+```
+
+## Architecture
+
+All application modules share state via the `window.IDE` namespace:
+
+```
+CSV Upload → PapaParse → IDE.cleanData() → IDE.analyzeColumns() → IDE.renderPivot()
+                                                                        ↓
+                                                              PivotTable.js UI
+                                                              (drag-and-drop)
+                                                                        ↓
+                                                         Toggle → Tabulator Grid
+```
+
+**JS load order matters** (no build tools, no ES modules):
+`config.js` → `column-analysis.js` → `data-cleaning.js` → `pivot-renderer.js` → `csv-handler.js` → `export-handler.js` → `raw-data-view.js` → `ui-controls.js`
+
+## Technologies
+
+| Library | Version | Purpose |
+|---------|---------|---------|
+| [jQuery](https://jquery.com/) | 3.6.0 | DOM manipulation |
+| [jQuery UI](https://jqueryui.com/) | — | Drag-and-drop |
+| [PapaParse](https://www.papaparse.com/) | — | CSV parsing |
+| [PivotTable.js](https://pivottable.js.org/) | — | Pivot table UI |
+| [Plotly.js](https://plotly.com/javascript/) | — | Interactive charts |
+| [Tabulator](https://tabulator.info/) | — | Data grid |
 
 ## How to Use
 
-1. Clone this repository or download the source code.
-2. Open `index.html` in any modern web browser (Chrome, Firefox, Safari, Edge).
-3. Click the **"Upload CSV File"** button to load your dataset.
-4. Use the drag-and-drop interface to configure your pivot table:
-   * Drag fields to the **Rows** or **Columns** areas.
-   * Select an **Aggregator** (e.g., Count, Sum, Average) and the target value field.
-   * Change the **Renderer** to switch between table views and various charts.
-5. Click **"View Raw Data"** to toggle between the pivot view and your underlying data.
-6. Use the Export buttons to save your tables or charts.
+1. Open `index.html` in any modern browser — or run a local server (`npx serve`).
+2. Sample data loads automatically. Or click **Upload CSV File** to load your own.
+3. Drag fields between **Available Fields**, **Row Fields**, **Column Fields**, and **Values**.
+4. Select an aggregator (Sum, Count, Average, etc.) and value field.
+5. Change the renderer in the toolbar dropdown (Table, Bar Chart, Line Chart, etc.).
+6. Click **View Raw Data** to switch to the filterable data grid.
+7. Click **Hide UI** to collapse the pivot controls and focus on the output.
+8. Export via **Export to CSV** or **Export Chart** (PNG).
 
 ## License
 
