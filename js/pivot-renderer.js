@@ -46,6 +46,16 @@ $(document).ready(function() {
                         $renderer.appendTo($host);
                     }
 
+                    // Move pvtUnused to TR0 first td, with rowspan=2
+                    var $pvtUi = $('#pivot-table-output table.pvtUi');
+                    var $tr0 = $pvtUi.find('tr').eq(0);
+                    var $emptyCell = $tr0.find('td.pvtUiCell').not('.pvtVals').not('.pvtAxisContainer').first();
+                    var $unused = $pvtUi.find('td.pvtAxisContainer.pvtUnused');
+                    if ($unused.length && $emptyCell.length) {
+                        $unused.attr('rowspan', 2);
+                        $emptyCell.replaceWith($unused);
+                    }
+
                 } catch (err) {
                     console.error('[IDE Pivot Layout]', err);
                 }
