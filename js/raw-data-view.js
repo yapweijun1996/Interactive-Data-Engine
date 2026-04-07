@@ -3,11 +3,31 @@
  */
 $(document).ready(function() {
 
+    function getCurrentTableSchemaSignature() {
+        if (!window.IDE.tabulatorTable) return '';
+
+        return window.IDE.tabulatorTable.getColumns()
+            .map(function(col) { return col.getField(); })
+            .filter(function(field) { return !!field; })
+            .join('\u001f');
+    }
+
     window.IDE.initTabulator = function() {
         try {
-        if (window.IDE.tabulatorTable) {
+        var nextSchemaSignature = window.IDE.getSchemaSignature(window.IDE.appData);
+        var currentSchemaSignature = getCurrentTableSchemaSignature();
+
+        if (window.IDE.tabulatorTable && currentSchemaSignature === nextSchemaSignature) {
             window.IDE.tabulatorTable.setData(window.IDE.appData);
+            window.IDE.lastDataSchemaSignature = nextSchemaSignature;
             return;
+        }
+
+        if (window.IDE.tabulatorTable) {
+            window.IDE.tabulatorTable.destroy();
+            window.IDE.tabulatorTable = null;
+            $('#long-table-output').empty();
+            $('#col-dropdown').hide().empty();
         }
 
         window.IDE.tabulatorTable = new Tabulator("#long-table-output", {
@@ -48,6 +68,8 @@ $(document).ready(function() {
                 headerSort: true,
             },
         });
+
+        window.IDE.lastDataSchemaSignature = nextSchemaSignature;
 
         } catch (err) {
             window.IDE.showError('Raw Data View', err);
@@ -94,14 +116,28 @@ $(document).ready(function() {
 
         // Build checkbox list
         var cols = window.IDE.tabulatorTable.getColumns();
-        var html = '<div class="col-dropdown-header">Toggle Columns</div>';
+        $dropdown.empty().append(
+            $('<div></div>').addClass('col-dropdown-header').text('Toggle Columns')
+        );
+
         cols.forEach(function(col) {
             var field = col.getField();
+            if (!field) return;
+
             var title = col.getDefinition().title || field;
-            var checked = col.isVisible() ? 'checked' : '';
-            html += '<label><input type="checkbox" data-field="' + field + '" ' + checked + '><span>' + title + '</span></label>';
+            var $label = $('<label></label>');
+            var $input = $('<input type="checkbox">').data('field', field);
+            var $title = $('<span></span>').text(title);
+
+            if (col.isVisible()) {
+                $input.prop('checked', true);
+            }
+
+            $label.append($input).append($title);
+            $dropdown.append($label);
         });
-        $dropdown.html(html).show();
+
+        $dropdown.show();
     });
 
     // Handle column checkbox change

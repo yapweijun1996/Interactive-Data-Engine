@@ -10,6 +10,7 @@ window.IDE = {
     tabulatorTable: null,
     isPivotView: true,
     configStorageKey: 'pivotAdvancedConfig_v2',
+    lastDataSchemaSignature: '',
     renderers: null,  // set in document.ready when jQuery plugins are available
 
     /**
@@ -24,6 +25,11 @@ window.IDE = {
         $statusText.text('Error: ' + context + ' — ' + (err.message || 'Unknown error'))
                    .css('color', '#ef4444');
         $statusDot.removeClass('loading active').addClass('error');
+    },
+
+    getSchemaSignature: function(data) {
+        if (!data || data.length === 0 || !data[0]) return '';
+        return Object.keys(data[0]).join('\u001f');
     }
 };
 

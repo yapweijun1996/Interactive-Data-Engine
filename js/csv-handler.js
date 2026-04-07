@@ -53,11 +53,11 @@ $(document).ready(function() {
 
         $('#header-toolbar').css('display', 'flex');
 
-        if (!window.IDE.isPivotView && window.IDE.tabulatorTable) {
+        if (!window.IDE.isPivotView) {
             try {
-                window.IDE.tabulatorTable.setData(window.IDE.appData);
+                window.IDE.initTabulator();
             } catch (tabErr) {
-                console.error('[IDE Tabulator setData]', tabErr);
+                console.error('[IDE Tabulator refresh]', tabErr);
             }
         }
 
@@ -123,8 +123,5 @@ $(document).ready(function() {
             }
         });
     });
-
-    // Auto-load sample data on page load
-    $('#btn-load-sample').trigger('click');
 
 });

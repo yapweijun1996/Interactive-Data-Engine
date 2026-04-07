@@ -35,9 +35,19 @@ window.IDE.analyzeColumns = function(data, preferredNumericCols) {
             return;
         }
 
-        // Numeric columns (IDs like Master Number, Project Code)
+        // Native numeric columns can be either measures or identifiers.
+        // Treat integer-like, highly unique ID/code fields as IDs; everything
+        // else is a candidate measure for default aggregation.
         if (nonEmpty.every(function(r) { return typeof r[key] === 'number'; })) {
-            result.idCols.push(key);
+            var uniqueRatio = new Set(nonEmpty.map(function(r) { return r[key]; })).size / nonEmpty.length;
+            var allIntegers = nonEmpty.every(function(r) { return Number.isInteger(r[key]); });
+            var keyLooksLikeId = /(id|code|number|num|no|ref|key)$/i.test(key.trim());
+
+            if (keyLooksLikeId || (allIntegers && uniqueRatio >= 0.95)) {
+                result.idCols.push(key);
+            } else {
+                result.valueCols.push(key);
+            }
             return;
         }
 
