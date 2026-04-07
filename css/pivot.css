@@ -9,41 +9,13 @@
      Row 1: td.pvtUnused | td.pvtRows          | td.pvtRendererArea
    ========================================================================== */
 
-/* Convert pvtUi from <table> layout to CSS Grid for full layout control.
-   PivotTable.js generates a <table> but we override its display model. */
+/* PivotTable.js UI Table */
 .pvtUi {
     font-family: 'Inter', sans-serif;
     width: 100%;
-    display: block !important;
+    border-spacing: 0.5rem;
 }
 
-.pvtUi > tbody {
-    display: grid;
-    grid-template-columns: 200px 250px 1fr;
-    gap: 0.5rem;
-}
-
-.pvtUi > tbody > tr {
-    display: contents;
-}
-
-/* Hide renderer cell — its dropdown is moved to toolbar by JS.
-   Hidden immediately via CSS to prevent flash of unstyled content. */
-td.pvtUiCell:not(.pvtVals):not(.pvtAxisContainer) {
-    display: none !important;
-}
-
-/* Also hide the renderer dropdown inside pvtUi (before JS moves it) */
-.pvtUi select.pvtRenderer {
-    display: none;
-}
-
-/* Grid placement — explicit positions for each zone */
-td.pvtAxisContainer.pvtUnused { grid-column: 1; grid-row: 1 / 3; }
-td.pvtVals                    { grid-column: 2; grid-row: 1; }
-td.pvtAxisContainer.pvtCols   { grid-column: 3; grid-row: 1; }
-td.pvtAxisContainer.pvtRows   { grid-column: 2; grid-row: 2; }
-td.pvtRendererArea            { grid-column: 3; grid-row: 2; }
 
 /* Drop Zone Section Labels */
 td.pvtAxisContainer::before,

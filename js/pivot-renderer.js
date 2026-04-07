@@ -31,25 +31,24 @@ $(document).ready(function() {
                     console.error("Failed to save state to localStorage", e);
                 }
 
-                setTimeout(function() {
-                    try {
-                        // 1. Wrap pvtTable for sticky headers
-                        var $table = $('table.pvtTable');
-                        if ($table.length > 0 && !$table.parent().hasClass('pvtTableWrapper')) {
-                            $table.wrap('<div class="pvtTableWrapper"></div>');
-                        }
-
-                        // 2. Move renderer dropdown to toolbar (idempotent)
-                        var $host = $('#renderer-host');
-                        var $renderer = $('#pivot-table-output select.pvtRenderer');
-                        if ($renderer.length && $host.length) {
-                            $host.empty();
-                            $renderer.appendTo($host);
-                        }
-                    } catch (err) {
-                        console.error('[IDE Pivot Layout]', err);
+                try {
+                    // Wrap pvtTable for sticky headers
+                    var $table = $('table.pvtTable');
+                    if ($table.length > 0 && !$table.parent().hasClass('pvtTableWrapper')) {
+                        $table.wrap('<div class="pvtTableWrapper"></div>');
                     }
-                }, 50);
+
+                    // Move renderer dropdown to toolbar immediately
+                    var $host = $('#renderer-host');
+                    var $renderer = $('#pivot-table-output select.pvtRenderer');
+                    if ($renderer.length && $host.length) {
+                        $host.empty();
+                        $renderer.appendTo($host);
+                    }
+
+                } catch (err) {
+                    console.error('[IDE Pivot Layout]', err);
+                }
             }
         };
     };
